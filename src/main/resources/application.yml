@@ -1,0 +1,20 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          okta:
+            issuer-uri: https://trial-8014635.okta.com/oauth2/default
+        registration:
+          okta:
+            client-id: ${OKTA_CLIENT_ID}
+            client-secret: ${OKTA_CLIENT_SECRET}
+            scope: openid, profile, email
+
+      resourceserver:
+        jwt:
+          issuer-uri: https://trial-8014635.okta.com/oauth2/default
+          jwk-set-uri: https://trial-8014635.okta.com/oauth2/default/v1/keys
