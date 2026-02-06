@@ -7,15 +7,14 @@ spring:
     oauth2:
       client:
         provider:
-          okta:
-            issuer-uri: https://trial-8014635.okta.com/oauth2/default
+          auth0:
+            issuer-uri: https://dev-lggipgkjxyl0wurk.us.auth0.com/
         registration:
-          okta:
-            client-id: ${OKTA_CLIENT_ID}
-            client-secret: ${OKTA_CLIENT_SECRET}
+          auth0:
+            client-id: ${AUTH0_CLIENT_ID}
+            client-secret: ${AUTH0_CLIENT_SECRET}
             scope: openid, profile, email
 
       resourceserver:
         jwt:
-          issuer-uri: https://trial-8014635.okta.com/oauth2/default
-          jwk-set-uri: https://trial-8014635.okta.com/oauth2/default/v1/keys
+          issuer-uri: https://dev-lggipgkjxyl0wurk.us.auth0.com/
