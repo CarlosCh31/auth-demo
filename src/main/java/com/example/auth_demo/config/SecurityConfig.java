@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -34,8 +35,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    private static final String AUTH0_AUDIENCE = "https://auth-demo-api";
-    private static final String ISSUER = "https://dev-lggipgkjxyl0wurk.us.auth0.com/";
+    @Value("${auth.audience}")
+    private String audience;
+
+    @Value("${auth.issuer}")
+    private String issuer;
 
     @Bean
     SecurityFilterChain webSecurity(HttpSecurity http, ClientRegistrationRepository clients) throws Exception {
@@ -91,7 +95,7 @@ public class SecurityConfig {
                     return null;
 
                 Map<String, Object> extraParams = new HashMap<>(req.getAdditionalParameters());
-                extraParams.put("audience", AUTH0_AUDIENCE);
+                extraParams.put("audience", audience);
 
                 return OAuth2AuthorizationRequest.from(req)
                         .additionalParameters(extraParams)
@@ -128,12 +132,12 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        NimbusJwtDecoder decoder = JwtDecoders.fromIssuerLocation(ISSUER);
+        NimbusJwtDecoder decoder = JwtDecoders.fromIssuerLocation(issuer);
 
-        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(ISSUER);
+        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuer);
         OAuth2TokenValidator<Jwt> withAudience = jwt -> {
             List<String> aud = jwt.getAudience();
-            if (aud != null && aud.contains(AUTH0_AUDIENCE)) {
+            if (aud != null && aud.contains(audience)) {
                 return OAuth2TokenValidatorResult.success();
             }
             return OAuth2TokenValidatorResult.failure(

@@ -2,13 +2,17 @@ server:
   port: ${PORT:8080}
   forward-headers-strategy: framework
 
+auth:
+  issuer: ${AUTH_ISSUER}
+  audience: ${AUTH_AUDIENCE}
+
 spring:
   security:
     oauth2:
       client:
         provider:
           auth0:
-            issuer-uri: https://dev-lggipgkjxyl0wurk.us.auth0.com/
+            issuer-uri: ${AUTH_ISSUER}
         registration:
           auth0:
             client-id: ${AUTH0_CLIENT_ID}
@@ -17,4 +21,4 @@ spring:
 
       resourceserver:
         jwt:
-          issuer-uri: https://dev-lggipgkjxyl0wurk.us.auth0.com/
+          issuer-uri: ${AUTH_ISSUER}

@@ -23,23 +23,41 @@ public class LogoutController {
 
     // Logout local ONLY
     @GetMapping("/logout-local")
-    public void logoutLocal(HttpServletRequest request, HttpServletResponse response, Authentication auth) throws Exception {
+    public void logoutLocal(HttpServletRequest request, HttpServletResponse response, Authentication auth)
+            throws Exception {
         new SecurityContextLogoutHandler().logout(request, response, auth);
         response.sendRedirect("/home.html?loggedOut=1");
     }
 
     // Logout completo (local + Auth0 SSO) para cambiar usuario
     @GetMapping("/logout-auth0")
-    public void logoutAuth0(HttpServletRequest request, HttpServletResponse response, Authentication auth) throws Exception {
+    public void logoutAuth0(HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication auth) throws Exception {
+
         new SecurityContextLogoutHandler().logout(request, response, auth);
 
-        String returnTo = "http://localhost:8080/home.html?loggedOut=1";
-        String logoutUrl =
-            issuer + "v2/logout" +
-            "?client_id=" + url(clientId) +
-            "&returnTo=" + url(returnTo);
+        String baseUrl = getBaseUrl(request);
+        String returnTo = baseUrl + "/home.html?loggedOut=1";
+
+        String logoutUrl = issuer + "v2/logout" +
+                "?client_id=" + url(clientId) +
+                "&returnTo=" + url(returnTo);
 
         response.sendRedirect(logoutUrl);
+    }
+
+    private String getBaseUrl(HttpServletRequest request) {
+        String scheme = request.getScheme();
+        String serverName = request.getServerName();
+        int port = request.getServerPort();
+
+        boolean isDefaultPort = ("http".equals(scheme) && port == 80) ||
+                ("https".equals(scheme) && port == 443);
+
+        return isDefaultPort
+                ? scheme + "://" + serverName
+                : scheme + "://" + serverName + ":" + port;
     }
 
     private String url(String s) {
