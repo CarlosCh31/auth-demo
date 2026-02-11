@@ -13,7 +13,7 @@ spring:
           auth0:
             client-id: ${AUTH0_CLIENT_ID}
             client-secret: ${AUTH0_CLIENT_SECRET}
-            scope: openid, profile, email
+            scope: openid, profile, email, read:r1, read:r2
 
       resourceserver:
         jwt:

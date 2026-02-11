@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auth Demo – Home</title>
+
+    <style>
+        :root {
+            --bg: #0b1020;
+            --card: #11182c;
+            --stroke: #1f2a44;
+            --text: #e8eefc;
+            --muted: #9aa6c8;
+            --accent: #60a5fa;
+            --accent2: #a78bfa;
+            --danger: #fb7185;
+            --radius: 16px;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto;
+            background: linear-gradient(180deg, #0b1020, #0f172a);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius);
+            padding: 40px;
+            width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 1.8rem;
+        }
+
+        p {
+            color: var(--muted);
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .05);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, .1);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+        }
+
+        .btn.primary:hover {
+            opacity: .9;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: .9rem;
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h1>OAuth2 Authorization Demo</h1>
+        <p>Spring Boot + Auth0<br />Role-based access control (RBAC)</p>
+
+        <button class="btn primary" onclick="goToApp()">
+            Go to Demo App
+        </button>
+
+        <button class="btn" onclick="viewTokens()">
+            View Tokens
+        </button>
+
+        <div class="status" id="status">
+            Checking session...
+        </div>
+    </div>
+    <div id="toast" style="
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    max-width: 320px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(17,24,39,.92);
+    color: #e8eefc;
+    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    display: none;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto;
+    font-weight: 600;
+    ">
+        You were logged out
+    </div>
+
+    <script>
+
+        function goToApp() {
+            window.location.href = '/dashboard.html';
+        }
+
+        function viewTokens() {
+            window.location.href = '/tokens';
+        }
+
+        async function checkSession() {
+            try {
+                const res = await fetch('/me', { cache: 'no-store' });
+                if (res.ok) {
+                    document.getElementById('status').innerText = "Session: Authenticated";
+                } else {
+                    document.getElementById('status').innerText = "Session: Not authenticated";
+                }
+            } catch (e) {
+                document.getElementById('status').innerText = "Session: Unknown";
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
+
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('loggedOut') === '1') {
+                showToast('✅ You were logged out');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        })();
+
+        checkSession();
+    </script>
+
+</body>
+
+</html>

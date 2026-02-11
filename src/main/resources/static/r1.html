@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resource 1</title>
+<style>
+  body{margin:0;font-family:system-ui;background:linear-gradient(180deg,#0b1020,#0f172a);color:#e8eefc;height:100vh;display:flex;align-items:center;justify-content:center;}
+  .card{width:560px;max-width:92vw;background:#11182c;border:1px solid #1f2a44;border-radius:18px;padding:26px;box-shadow:0 25px 70px rgba(0,0,0,.4);}
+  .tag{display:inline-block;margin-top:8px;padding:6px 12px;border-radius:999px;background:#1e293b;border:1px solid #334155;color:#60a5fa;font-weight:700;}
+  pre{margin:14px 0 0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:12px;overflow:auto;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .btn{padding:10px 14px;border-radius:12px;border:1px solid #334155;background:#1e293b;color:#e8eefc;font-weight:800;cursor:pointer;}
+  .btn:hover{background:#26364f;}
+  .btn.primary{border-color:rgba(96,165,250,.35);background:rgba(96,165,250,.12);}
+  .danger{color:#fb7185;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1 style="margin:0;">Resource 1</h1>
+    <div class="tag">requires read:r1</div>
+
+    <p id="status" style="margin-top:14px;color:#9aa6c8;">Loading from <b>/api/r1</b>…</p>
+    <pre id="out">{}</pre>
+
+    <div class="row">
+      <button class="btn" onclick="location.href='/dashboard.html'">← Back to Dashboard</button>
+      <button class="btn primary" onclick="load()">Reload</button>
+    </div>
+  </div>
+
+<script>
+  async function load(){
+    const status = document.getElementById('status');
+    const out = document.getElementById('out');
+    status.textContent = "Loading from /api/r1…";
+    out.textContent = "{}";
+
+    try{
+      const res = await fetch('/api/r1', { cache: 'no-store' });
+
+      if(res.status === 401){
+        status.innerHTML = "Not authenticated. Go back and login.";
+        out.textContent = JSON.stringify({error:"401", message:"Not authenticated"}, null, 2);
+        return;
+      }
+      if(res.status === 403){
+        status.innerHTML = "<span class='danger'><b>Access denied</b></span> (missing permission read:r1)";
+        out.textContent = JSON.stringify({error:"403", message:"Missing permission read:r1"}, null, 2);
+        return;
+      }
+
+      const data = await res.json();
+      status.innerHTML = "<b>Access granted ✅</b> (data fetched from /api/r1)";
+      out.textContent = JSON.stringify(data, null, 2);
+    }catch(e){
+      status.innerHTML = "<span class='danger'><b>Error</b></span> calling /api/r1";
+      out.textContent = JSON.stringify({error:"fetch_failed", message:String(e)}, null, 2);
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>

@@ -16,9 +16,8 @@ public class MeController {
         OAuth2AuthenticationToken oat = (OAuth2AuthenticationToken) auth;
         OidcUser user = (OidcUser) oat.getPrincipal();
         return Map.of(
-            "name", user.getFullName(),
-            "email", user.getEmail(),
-            "claims", user.getClaims()
-        );
+                "name", user.getFullName(),
+                "email", user.getEmail(),
+                "claims", user.getClaims());
     }
 }

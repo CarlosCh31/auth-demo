@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Auth Demo – Dashboard</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --card: #11182c;
+            --stroke: #1f2a44;
+            --text: #e8eefc;
+            --muted: #9aa6c8;
+            --accent: #60a5fa;
+            --danger: #fb7185;
+            --radius: 16px;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto;
+            background: linear-gradient(180deg, #0b1020, #0f172a);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .wrap {
+            width: min(980px, 92vw);
+            padding: 40px 0;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        @media (max-width: 860px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .06);
+            color: var(--text);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, .10);
+        }
+
+        .btn.danger {
+            border-color: rgba(251, 113, 133, .35);
+            background: rgba(251, 113, 133, .12);
+        }
+
+        .btn.danger:hover {
+            background: rgba(251, 113, 133, .18);
+        }
+
+        .pill {
+            display: inline-flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .chip {
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .04);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: .92rem;
+            color: var(--muted);
+        }
+
+        pre {
+            margin: 0;
+            background: rgba(0, 0, 0, .35);
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 14px;
+            padding: 12px;
+            overflow: auto;
+            color: rgba(255, 255, 255, .92);
+            font-size: .9rem;
+            line-height: 1.35;
+        }
+
+        a.link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        a.link:hover {
+            text-decoration: underline;
+        }
+
+        .links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="top">
+            <div>
+                <h1>Dashboard</h1>
+                <div class="muted">Shows options based on <b>permissions</b> in the access token.</div>
+            </div>
+            <div>
+                <button class="btn" onclick="logoutLocal()">Logout (local)</button>
+                <button class="btn danger" onclick="logoutFull()">Logout (full / switch user)</button>
+            </div>
+        </div>
+
+        <div class="grid">
+            <section class="card">
+                <h2 style="margin:0 0 10px;">User</h2>
+                <div class="muted" id="userLine">Loading…</div>
+                <div class="pill" id="permChips"></div>
+
+                <div class="links" id="resourceLinks"></div>
+
+                <div class="muted" style="margin-top:14px;">
+                    Token viewer: <a class="link" href="/tokens">/tokens</a>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2 style="margin:0 0 10px;">Access token body (decoded)</h2>
+                <pre id="tokenBody">{}</pre>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function logoutLocal() { window.location.href = '/logout-local'; }
+        function logoutFull() { window.location.href = '/logout-auth0'; }
+
+
+        function hasPerm(perms, p) { return perms.includes(p); }
+
+        async function load() {
+            const res = await fetch('/tokens', { cache: 'no-store' });
+            if (!res.ok) {
+                window.location.href = '/home.html';
+                return;
+            }
+
+            const data = await res.json();
+
+            const id = data.id_token_claims || {};
+            const accessBody = data.access_token_body || {};
+            const perms = accessBody.permissions || [];
+
+            let scope = accessBody.scope || "";
+            if ((!perms || perms.length === 0) && typeof scope === "string") {
+                perms = scope.split(" ").filter(s => s.includes(":"));
+            }
+
+            const nickname = id.nickname || "(no nickname)";
+            const name = id.name || "(no name)";
+            const email = id.email || "(no email)";
+            const updatedAt = id.updated_at || "(no updated_at)";
+            const iat = accessBody.iat ? new Date(accessBody.iat * 1000).toISOString() : "(no iat)";
+            const exp = accessBody.exp ? new Date(accessBody.exp * 1000).toISOString() : "(no exp)";
+
+            document.getElementById('userLine').innerHTML =
+                `<b>${nickname}</b> · ${email}<br>
+    <span class="muted">name:</span> ${name}<br>
+    <span class="muted">updated_at:</span> ${updatedAt}<br>
+    <span class="muted">token iat:</span> ${iat}<br>
+    <span class="muted">token exp:</span> ${exp}`;
+
+            const chips = document.getElementById('permChips');
+            chips.innerHTML = "";
+            (perms || []).forEach(p => {
+                const el = document.createElement('span');
+                el.className = 'chip';
+                el.textContent = p;
+                chips.appendChild(el);
+            });
+            if (!perms || perms.length === 0) {
+                const el = document.createElement('span');
+                el.className = 'chip';
+                el.textContent = 'no permissions';
+                chips.appendChild(el);
+            }
+
+            const links = document.getElementById('resourceLinks');
+            links.innerHTML = "";
+
+            if (hasPerm(perms, 'read:r1')) {
+                const a = document.createElement('a');
+                a.className = 'link';
+                a.href = '/r1.html';
+                a.textContent = 'Open Resource 1';
+                links.appendChild(a);
+            }
+            if (hasPerm(perms, 'read:r2')) {
+                const a = document.createElement('a');
+                a.className = 'link';
+                a.href = '/r2.html';
+                a.textContent = 'Open Resource 2';
+                links.appendChild(a);
+            }
+            document.getElementById('tokenBody').textContent = JSON.stringify(accessBody, null, 2);
+        }
+
+        load();
+    </script>
+</body>
+
+</html>
