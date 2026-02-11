@@ -37,9 +37,12 @@ public class TokensController {
                 ? client.getAccessToken().getTokenValue()
                 : null;
 
+        String idTokenRaw = user.getIdToken().getTokenValue();
+
         Object accessTokenBody = decodeJwtBody(accessToken);
 
         return Map.of(
+                "id_token_raw", idTokenRaw,
                 "id_token_claims", user.getClaims(),
                 "access_token_raw", accessToken,
                 "access_token_body", accessTokenBody);
