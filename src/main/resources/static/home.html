@@ -95,13 +95,6 @@
             Go to Demo App
         </button>
 
-        <button class="btn" onclick="viewTokens()">
-            View Tokens
-        </button>
-
-        <div class="status" id="status">
-            Checking session...
-        </div>
     </div>
     <div id="toast" style="
     position: fixed;
@@ -125,23 +118,6 @@
 
         function goToApp() {
             window.location.href = '/dashboard.html';
-        }
-
-        function viewTokens() {
-            window.location.href = '/tokens';
-        }
-
-        async function checkSession() {
-            try {
-                const res = await fetch('/me', { cache: 'no-store' });
-                if (res.ok) {
-                    document.getElementById('status').innerText = "Session: Authenticated";
-                } else {
-                    document.getElementById('status').innerText = "Session: Not authenticated";
-                }
-            } catch (e) {
-                document.getElementById('status').innerText = "Session: Unknown";
-            }
         }
 
         function showToast(msg) {
